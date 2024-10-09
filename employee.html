@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Employee Dashboard</h1>
+        <p id="dateTime"></p>
+
+        <h2>Attendance</h2>
+        <button class="attendance-button" onclick="markAttendance()">Mark Attendance</button>
+        <p id="attendanceStatus">Attendance: Not Marked</p>
+        <p id="attendanceCount">Total Attendance: 0 / 22 days</p>
+
+        <h2>Employee Info</h2>
+        <ul class="stats-list">
+            <li>Team: <span id="teamName">Not Selected</span></li>
+            <li>Sick Leaves: 2</li>
+            <li>Paid Leaves: 3</li>
+        </ul>
+
+        <h2>Task Summary</h2>
+        <ul class="stats-list">
+            <li>Total Tasks Assigned: <span id="totalTasks">0</span></li>
+            <li>Tasks Completed: <span id="tasksCompleted">0</span></li>
+            <li>Tasks Left: <span id="tasksLeft">0</span></li>
+        </ul>
+
+        <h2>Assigned Tasks</h2>
+        <ul id="taskList" class="task-list">
+            <!-- Dynamic task entries will appear here -->
+        </ul>
+    </div>
+
+    <script>
+        const teamName = sessionStorage.getItem('userTeam');
+        document.getElementById('teamName').textContent = teamName || 'Not Selected';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            document.getElementById('dateTime').textContent = `Date: ${now.toLocaleDateString()} Time: ${now.toLocaleTimeString()}`;
+
+            loadTasks(); // Load tasks for this employee
+            updateAttendanceStatus(); // Load attendance status and count
+        });
+
+        const totalWorkingDays = 22;
+
+        function markAttendance() {
+            // Retrieve current attendance count and increment
+            let currentAttendance = parseInt(localStorage.getItem('attendanceCount')) || 0;
+            currentAttendance++;
+
+            // Update localStorage
+            localStorage.setItem('attendanceCount', currentAttendance);
+            localStorage.setItem('attendanceStatus', 'Marked Present');
+
+            // Update UI
+            document.getElementById('attendanceStatus').textContent = "Attendance: Marked Present";
+            document.getElementById('attendanceCount').textContent = `Total Attendance: ${currentAttendance} / ${totalWorkingDays} days`;
+        }
+
+        function updateAttendanceStatus() {
+            const status = localStorage.getItem('attendanceStatus');
+            const attendanceCount = parseInt(localStorage.getItem('attendanceCount')) || 0;
+
+            if (status) {
+                document.getElementById('attendanceStatus').textContent = `Attendance: ${status}`;
+            }
+
+            document.getElementById('attendanceCount').textContent = `Total Attendance: ${attendanceCount} / ${totalWorkingDays} days`;
+        }
+
+        function loadTasks() {
+            const allTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const teamTasks = allTasks.filter(task => task.team === teamName);
+
+            let totalTasks = teamTasks.length;
+            let completedTasks = teamTasks.filter(task => task.status === 'completed').length;
+
+            document.getElementById('totalTasks').textContent = totalTasks;
+            document.getElementById('tasksCompleted').textContent = completedTasks;
+            document.getElementById('tasksLeft').textContent = totalTasks - completedTasks;
+
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = teamTasks.map((task, index) =>
+                `<li>
+                    ${task.description} (${task.status}) 
+                    ${task.status === 'pending' ? `<button onclick="markTaskCompleted(${index})">Mark Completed</button>` : ''}
+                </li>`
+            ).join('');
+        }
+
+        function markTaskCompleted(taskIndex) {
+            let allTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const teamTasks = allTasks.filter(task => task.team === teamName);
+
+            // Update the specific task's status to completed
+            const taskToMark = teamTasks[taskIndex];
+            taskToMark.status = 'completed';
+
+            // Update the global tasks list
+            const globalTaskIndex = allTasks.findIndex(task => task.description === taskToMark.description && task.team === teamName);
+            allTasks[globalTaskIndex] = taskToMark;
+
+            localStorage.setItem('tasks', JSON.stringify(allTasks));
+            loadTasks(); // Reload tasks to reflect changes
+        }
+    </script>
+</body>
+</html>

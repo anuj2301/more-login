@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Owner Dashboard</h1>
+        <p id="dateTime"></p>
+
+        <h2>Assign Work to Teams</h2>
+        <form id="assignForm">
+            <label for="team">Select Team</label>
+            <select id="team" class="team-select">
+                <option value="development">Development</option>
+                <option value="marketing">Marketing</option>
+                <option value="hr">HR</option>
+            </select>
+
+            <label for="task">Task</label>
+            <input type="text" id="task" placeholder="Enter Task" required>
+
+            <button type="button" onclick="assignTask()">Assign Task</button>
+        </form>
+
+        <h2>All Assigned Tasks</h2>
+        <ul id="taskList" class="task-list">
+            <!-- Dynamic task entries will appear here -->
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            document.getElementById('dateTime').textContent = `Date: ${now.toLocaleDateString()} Time: ${now.toLocaleTimeString()}`;
+
+            loadTasks();
+        });
+
+        function assignTask() {
+            const team = document.getElementById('team').value;
+            const task = document.getElementById('task').value;
+
+            const newTask = {
+                team: team,
+                description: task,
+                status: 'pending'
+            };
+
+            let allTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            allTasks.push(newTask);
+            localStorage.setItem('tasks', JSON.stringify(allTasks));
+
+            loadTasks();
+            document.getElementById('task').value = ''; // Clear input field
+        }
+
+        function loadTasks() {
+            const allTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = allTasks.map(task => `<li>${task.team.charAt(0).toUpperCase() + task.team.slice(1)}: ${task.description} (${task.status})</li>`).join('');
+        }
+    </script>
+</body>
+</html>

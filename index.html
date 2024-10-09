@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter Username" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter Password" required>
+
+            <label for="role">Select Role</label>
+            <select id="role" required>
+                <option value="employee">Employee</option>
+                <option value="owner">Owner</option>
+            </select>
+
+            <div id="teamSelect" style="display:none;">
+                <label for="team">Select Team</label>
+                <select id="team">
+                    <option value="development">Development</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="hr">HR</option>
+                </select>
+            </div>
+
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
